@@ -1,0 +1,29 @@
+{
+  "name": "who-am-i",
+  "version": "1.0.0",
+  "description": "Url Shortener Service - FFC Project",
+  "main": "server.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mutasem-Halawani/url-shortener.git"
+  },
+  "keywords": [
+    "Express",
+    "Url",
+    "Shortener",
+    "Service",
+    "FFC"
+  ],
+  "author": "Mutasem Halawani",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mutasem-Halawani/url-shortener/issues"
+  },
+  "homepage": "https://github.com/Mutasem-Halawani/url-shortener#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
