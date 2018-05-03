@@ -1,41 +1,42 @@
-const express = require('express');
-const path = require('path');
+const express = require('express')
+const path = require('path')
+var mongoose = require('mongoose')
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000
 
-const app = express();
+const app = express()
+var mongoDB = 'mongodb://mutasem:mutasem@ds111410.mlab.com:11410/testdb0'
 
-const mongo = require('mongodb').MongoClient;
-// const url = 'mongodb://https://url-shortener-service-ffc.herokuapp.com/heroku_prtr1p3x';
+app.use(express.static(path.join(__dirname, 'public')))
+app.get('/new/:website', (req, res) => {
+  const pattern = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm
+  // console.log(req.params.website)
+  let website = req.params.website
+  let isValid = Boolean(pattern.test(website))
+  
+  if (isValid) {
+    mongoose.connect(mongoDB, (err, db) => {
+      if (err) { return err }
+      db.collection('websites').find({'old': website}).forEach((item) => {
+        console.log(item)
+        // res.send(JSON.stringify({
+        //   'short': item.new
+        // }))
+      })
 
-
-var dbUrl = 'mongodb://amk:W4UY|c-_hyJc7nJ@ds013222.mlab.com:13222/shorten_url';
-// const DB = {
-//     server: "ds155288",
-//     port: 55288 || 27017,
-//     dbname: "heroku_prtr1p3x"
-// };
-
-// DB.conn = mongo(DB.server, DB.port, DB.dbname);
-
-// console.log(DB.conn);
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('*', (req, res) => {
-    mongo.connect(dbUrl, (err, db) => {
-        console.log('db: ', db);
-
-        var urlList = db.collection('urlList');
-        // db.getCollection('urlList').find({});
-        db.getCollectionNames();
-    });
-});
-
+      // db.close()
+    })
+  } else {
+    res.send(JSON.stringify({
+      'error': 'This url is invalid'
+    }))
+  }
+})
 
 // app.get('/new/:website', (req, res) => {
-//     const pattern = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
+//     
 //     let userInput = req.params.website;
-    
+
 //     let isValid = Boolean(pattern.test(userInput));
 //     console.log(isValid);
 //     if (isValid) {
@@ -46,7 +47,7 @@ app.get('*', (req, res) => {
 //             // docs.getAll().then(data => {
 //             //     console.log('New age: 40');
 //             // }).catch(console.log());
-        
+
 //             db.close();
 //         });
 
@@ -57,4 +58,4 @@ app.get('*', (req, res) => {
 //     }
 // });
 
-app.listen(port, console.log(`Listening on port ${port}`));
+app.listen(port, console.log(`Listening on port ${port}`))
