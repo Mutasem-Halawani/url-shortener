@@ -17,10 +17,9 @@ app.get('/new/:website', (req, res) => {
   if (isValid) {
     mongoose.connect(mongoDB, (err, db) => {
       if (err) { return err }
-      db.collection('websites').findOne({'old': website}, (err, item) => {
+      db.collection('websites').findOne({'original_url': website}, (err, item) => {
         if (err) { return err }
         if (item) {
-          console.log(typeof (item))
           res.setHeader('Content-Type', 'application/json')
           res.send(JSON.stringify({
             'item exists before': 'true',
@@ -28,13 +27,13 @@ app.get('/new/:website', (req, res) => {
           }))
         } else {
           db.collection('websites').insert({
-            'old': website,
-            'new': newWebsite
+            'original_url': website,
+            'short_url': newWebsite
           })
           res.setHeader('Content-Type', 'application/json')
           res.send(JSON.stringify({
-            'old': website,
-            'new': newWebsite
+            'original_url': website,
+            'short_url': newWebsite
           }))
         }
       })
@@ -54,10 +53,10 @@ app.get('/:short', (req, res) => {
   if (isNumber) {
     mongoose.connect(mongoDB, (err, db) => {
       if (err) { return err }
-      db.collection('websites').findOne({'new': shortURL}, (err, item) => {
+      db.collection('websites').findOne({'short_url': shortURL}, (err, item) => {
         if (err) { return err }
         if (item) {
-          let redirectURL = item.old
+          let redirectURL = item.original_url
           res.redirect(`http://${redirectURL}`)
         } else {
           res.setHeader('Content-Type', 'application/json')
@@ -73,6 +72,10 @@ app.get('/:short', (req, res) => {
       'error': 'Short Urls consist of numbers only'
     }))
   }
+})
+
+app.get('*', (req, res) => {
+  res.redirect('/')
 })
 
 app.listen(port, console.log(`Listening on port ${port}`))
