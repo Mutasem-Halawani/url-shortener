@@ -11,6 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.get('/new/:website', (req, res) => {
   const pattern = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm
   var newWebsite = Math.floor(1000 + Math.random() * 9000)
+
   // console.log(newWebsite)
   // console.log(req.params.website)
   let website = req.params.website
@@ -24,7 +25,7 @@ app.get('/new/:website', (req, res) => {
       //   'new': newWebsite
       // })
 
-      db.collection('websites').findOne({'old': website}, function (err, item) {
+      db.collection('websites').findOne({'old': website}, (err, item) => {
         if (err) {
           console.log(err)
           // return err
@@ -35,17 +36,51 @@ app.get('/new/:website', (req, res) => {
           //   res.send(JSON.stringify(item))
           //   console.log(item)
           // })
-        } else {
+        } else { // if doesnt exist add it to database
           console.log('item doesnt exist')
         }
       })
 
-      // db.die()
+      db.close()
     })
   } else {
-    console.log('Error')
+    res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify({
       'error': 'This url is invalid'
+    }))
+  }
+})
+
+app.get('/:short', (req, res) => {
+
+  const numberPattern = /^[0-9]*$/
+  let shortURL = Number(req.params.short)
+  let isNumber = Boolean(numberPattern.test(shortURL))
+
+  // console.log(typeof (shortURL))
+  if (isNumber) {
+    mongoose.connect(mongoDB, (err, db) => {
+      if (err) {
+        console.log(err)
+        return err
+      }
+      db.collection('websites').findOne({'new': shortURL}, (err, item) => {
+        if (err) {
+          console.log(err)
+          return err
+        }
+        if (item) {
+          let redirectURL = item.old
+          res.redirect(`http://${redirectURL}`)
+        } else {
+          console.log('item doesnt exist')
+        }
+      })
+    })
+  } else {
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify({
+      'error': 'Short Urls consist of numbers only'
     }))
   }
 })
